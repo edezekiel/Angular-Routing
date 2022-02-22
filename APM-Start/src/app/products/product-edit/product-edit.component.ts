@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { MessageService } from '../../messages/message.service';
 
@@ -9,14 +12,28 @@ import { ProductService } from '../product.service';
   templateUrl: './product-edit.component.html',
   styleUrls: ['./product-edit.component.css']
 })
-export class ProductEditComponent {
+export class ProductEditComponent implements OnInit, OnDestroy {
   pageTitle = 'Product Edit';
   errorMessage: string;
 
   product: Product;
 
+  subscription = new Subscription();
+
   constructor(private productService: ProductService,
-              private messageService: MessageService) { }
+              private messageService: MessageService,
+              private route: ActivatedRoute,
+              private router: Router) { }
+
+  ngOnInit(): void {
+    this.subscription.add(this.route.paramMap.subscribe(params => {
+      this.getProduct(+params.get('id'));
+    }))
+  }
+  
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 
   getProduct(id: number): void {
     this.productService.getProduct(id).subscribe({
@@ -76,6 +93,6 @@ export class ProductEditComponent {
       this.messageService.addMessage(message);
     }
 
-    // Navigate back to the product list
+    this.router.navigate(['/products'])
   }
 }
