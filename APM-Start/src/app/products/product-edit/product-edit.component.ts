@@ -1,7 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 import { MessageService } from '../../messages/message.service';
 
@@ -12,13 +10,11 @@ import { ProductService } from '../product.service';
   templateUrl: './product-edit.component.html',
   styleUrls: ['./product-edit.component.css']
 })
-export class ProductEditComponent implements OnInit, OnDestroy {
+export class ProductEditComponent implements OnInit {
   pageTitle = 'Product Edit';
   errorMessage: string;
 
   product: Product;
-
-  subscription = new Subscription();
 
   constructor(private productService: ProductService,
               private messageService: MessageService,
@@ -26,20 +22,11 @@ export class ProductEditComponent implements OnInit, OnDestroy {
               private router: Router) { }
 
   ngOnInit(): void {
-    this.subscription.add(this.route.paramMap.subscribe(params => {
-      this.getProduct(+params.get('id'));
-    }))
-  }
-  
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-  getProduct(id: number): void {
-    this.productService.getProduct(id).subscribe({
-      next: product => this.onProductRetrieved(product),
-      error: err => this.errorMessage = err
-    });
+    this.route.data.subscribe(data => {
+      const productResult = data['productResult'];
+      this.errorMessage = productResult.error;
+      this.onProductRetrieved(productResult.product);
+    })
   }
 
   onProductRetrieved(product: Product): void {
