@@ -7,6 +7,8 @@ import { ProductResolver } from './product-resolver.service';
 import { ProductListComponent } from './product-list.component';
 import { ProductDetailComponent } from './product-detail.component';
 import { ProductEditComponent } from './product-edit/product-edit.component';
+import { ProductEditInfoComponent } from './product-edit/product-edit-info.component';
+import { ProductEditTagsComponent } from './product-edit/product-edit-tags.component';
 
 @NgModule({
   imports: [
@@ -22,6 +24,11 @@ import { ProductEditComponent } from './product-edit/product-edit.component';
         path: 'products/:id/edit',
         component: ProductEditComponent,
         resolve: { productResult: ProductResolver },
+        children: [
+          { path: '', redirectTo: 'info', pathMatch: 'full' },
+          { path: 'info', component: ProductEditInfoComponent },
+          { path: 'tags', component: ProductEditTagsComponent },
+        ],
       },
     ]),
   ],
@@ -29,6 +36,8 @@ import { ProductEditComponent } from './product-edit/product-edit.component';
     ProductListComponent,
     ProductDetailComponent,
     ProductEditComponent,
+    ProductEditInfoComponent,
+    ProductEditTagsComponent
   ],
 })
 export class ProductModule {}
