@@ -8,7 +8,7 @@ import { ProductService } from '../product.service';
 
 @Component({
   templateUrl: './product-edit.component.html',
-  styleUrls: ['./product-edit.component.css']
+  styleUrls: ['./product-edit.component.css'],
 })
 export class ProductEditComponent implements OnInit {
   pageTitle = 'Product Edit';
@@ -16,17 +16,33 @@ export class ProductEditComponent implements OnInit {
 
   product: Product;
 
-  constructor(private productService: ProductService,
-              private messageService: MessageService,
-              private route: ActivatedRoute,
-              private router: Router) { }
+  get isValidInfoForm(): boolean {
+    return !!(
+      this.product.productName &&
+      this.product.productName.length >= 3 &&
+      this.product.productCode
+    );
+  }
+
+  get isValidTagForm(): boolean {
+    return !!(this.product.category && this.product.category.length >= 3);
+  }
+
+  private dataIsValid: { [key: string]: boolean } = {};
+
+  constructor(
+    private productService: ProductService,
+    private messageService: MessageService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.route.data.subscribe(data => {
+    this.route.data.subscribe((data) => {
       const productResult = data['productResult'];
       this.errorMessage = productResult.error;
       this.onProductRetrieved(productResult.product);
-    })
+    });
   }
 
   onProductRetrieved(product: Product): void {
@@ -50,24 +66,42 @@ export class ProductEditComponent implements OnInit {
     } else {
       if (confirm(`Really delete the product: ${this.product.productName}?`)) {
         this.productService.deleteProduct(this.product.id).subscribe({
-          next: () => this.onSaveComplete(`${this.product.productName} was deleted`),
-          error: err => this.errorMessage = err
+          next: () =>
+            this.onSaveComplete(`${this.product.productName} was deleted`),
+          error: (err) => (this.errorMessage = err),
         });
       }
     }
+  }
+
+  isValid(path?: string): boolean {
+    this.validate();
+    if (path) {
+      return this.dataIsValid[path];
+    }
+    return (
+      this.dataIsValid &&
+      Object.keys(this.dataIsValid).every((d) => this.dataIsValid[d] === true)
+    );
   }
 
   saveProduct(): void {
     if (true === true) {
       if (this.product.id === 0) {
         this.productService.createProduct(this.product).subscribe({
-          next: () => this.onSaveComplete(`The new ${this.product.productName} was saved`),
-          error: err => this.errorMessage = err
+          next: () =>
+            this.onSaveComplete(
+              `The new ${this.product.productName} was saved`
+            ),
+          error: (err) => (this.errorMessage = err),
         });
       } else {
         this.productService.updateProduct(this.product).subscribe({
-          next: () => this.onSaveComplete(`The updated ${this.product.productName} was saved`),
-          error: err => this.errorMessage = err
+          next: () =>
+            this.onSaveComplete(
+              `The updated ${this.product.productName} was saved`
+            ),
+          error: (err) => (this.errorMessage = err),
         });
       }
     } else {
@@ -80,6 +114,17 @@ export class ProductEditComponent implements OnInit {
       this.messageService.addMessage(message);
     }
 
-    this.router.navigate(['/products'])
+    this.router.navigate(['/products']);
+  }
+
+  validate() {
+    // Clear the validation object
+    this.dataIsValid = {};
+
+    // 'info' tab
+    this.dataIsValid['info'] = this.isValidInfoForm;
+
+    // 'tags' tab
+    this.dataIsValid['tags'] = this.isValidTagForm;
   }
 }
