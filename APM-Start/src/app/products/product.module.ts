@@ -9,6 +9,8 @@ import { ProductDetailComponent } from './product-detail.component';
 import { ProductEditComponent } from './product-edit/product-edit.component';
 import { ProductEditInfoComponent } from './product-edit/product-edit-info.component';
 import { ProductEditTagsComponent } from './product-edit/product-edit-tags.component';
+import { AuthGuard } from '../user/auth.guard';
+import { ProductEditGuard } from './product-edit/product-edit.guard';
 
 @NgModule({
   imports: [
@@ -16,6 +18,7 @@ import { ProductEditTagsComponent } from './product-edit/product-edit-tags.compo
     RouterModule.forChild([
       {
         path: 'products',
+        canActivate: [AuthGuard],
         children: [
           { path: '', component: ProductListComponent },
           {
@@ -26,6 +29,7 @@ import { ProductEditTagsComponent } from './product-edit/product-edit-tags.compo
           {
             path: ':id/edit',
             component: ProductEditComponent,
+            canDeactivate: [ProductEditGuard],
             resolve: { productResult: ProductResolver },
             children: [
               { path: '', redirectTo: 'info', pathMatch: 'full' },
